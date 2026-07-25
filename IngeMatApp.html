@@ -1,0 +1,1201 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IngeMath - Calculadora de Construcción e IA Asistente</title>
+    <style>
+        :root {
+            --primary-blue: #1b3d6d;
+            --accent-orange: #d97724;
+            --light-bg-blue: #f0f4f9;
+            --bg-body: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border-color: #cbd5e1;
+            --shadow-sm: 0 2px 4px rgba(0,0,0,0.02);
+            --shadow-md: 0 4px 12px rgba(27, 61, 109, 0.08);
+            --transition: all 0.2s ease;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        body {
+            background-color: #94a3b8; 
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .phone-container {
+            width: 100%;
+            max-width: 480px;
+            background-color: var(--bg-body);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            overflow-x: hidden;
+        }
+
+        .app-header {
+            background-color: var(--primary-blue);
+            color: white;
+            text-align: center;
+            padding: 14px 0;
+            font-size: 1.2rem;
+            font-weight: 700;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            letter-spacing: 0.5px;
+            border-bottom: 3px solid var(--accent-orange);
+        }
+
+        .app-content {
+            flex: 1;
+            padding: 16px 16px 85px 16px;
+            overflow-y: auto;
+        }
+
+        .screen {
+            animation: fadeIn 0.2s ease-out;
+        }
+
+        .screen.hidden {
+            display: none !important;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Banner IA */
+        .ai-banner {
+            background: linear-gradient(135deg, var(--primary-blue), #2a5298);
+            color: white;
+            border-radius: 16px;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            cursor: pointer;
+            box-shadow: var(--shadow-md);
+            border-left: 5px solid var(--accent-orange);
+        }
+
+        .ai-profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .ai-avatar {
+            width: 40px;
+            height: 40px;
+            background-color: rgba(255,255,255,0.15);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.4rem;
+        }
+
+        .ai-text h3 { font-size: 1rem; font-weight: 600; }
+        .ai-text p { font-size: 0.8rem; opacity: 0.9; }
+
+        /* Fila de Botones */
+        .secondary-actions {
+            display: flex;
+            margin-bottom: 20px;
+        }
+
+        .btn-action {
+            width: 100%;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            padding: 12px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--primary-blue);
+            cursor: pointer;
+            box-shadow: var(--shadow-sm);
+            border-bottom: 2px solid var(--accent-orange);
+        }
+
+        /* Cuadrícula de Módulos */
+        .modules-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+
+        .card-module {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: var(--shadow-sm);
+            aspect-ratio: 1 / 1.25;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .card-module:active {
+            transform: scale(0.96);
+            background-color: var(--light-bg-blue);
+        }
+
+        .card-image-area {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 12px;
+        }
+
+        .card-image-area svg {
+            width: 75%;
+            height: auto;
+            max-height: 55px;
+            fill: var(--primary-blue);
+        }
+
+        .card-label {
+            background-color: var(--light-bg-blue);
+            color: var(--primary-blue);
+            font-size: 0.72rem;
+            font-weight: 600;
+            text-align: center;
+            padding: 8px 4px;
+            border-top: 1px solid rgba(27, 61, 109, 0.08);
+        }
+
+        /* Formularios */
+        .form-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: var(--primary-blue);
+            border-left: 4px solid var(--accent-orange);
+            padding-left: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 6px;
+            font-size: 0.88rem;
+            color: #475569;
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1.5px solid var(--border-color);
+            border-radius: 10px;
+            font-size: 0.95rem;
+            outline: none;
+            background-color: #fafafa;
+            transition: var(--transition);
+        }
+
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            border-color: var(--primary-blue);
+            background-color: #fff;
+            box-shadow: 0 0 0 3px rgba(27, 61, 109, 0.12);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        /* Botones */
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        button {
+            padding: 14px 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            flex: 1;
+            transition: var(--transition);
+        }
+
+        .btn-primary {
+            background-color: var(--accent-orange);
+            color: white;
+            box-shadow: 0 4px 10px rgba(217, 119, 36, 0.25);
+        }
+
+        .btn-primary:active { background-color: #b8621d; }
+
+        .btn-secondary {
+            background-color: #f1f5f9;
+            color: var(--primary-blue);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 0.78rem;
+            border-radius: 8px;
+            flex: none;
+        }
+
+        /* Tarjeta de Resultados e Historial */
+        .results-card, .history-card {
+            background: #ffffff;
+            border: 1.5px solid var(--border-color);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: var(--shadow-md);
+            border-top: 4px solid var(--primary-blue);
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px dashed var(--border-color);
+            font-size: 0.9rem;
+        }
+
+        .result-item:last-child { border-bottom: none; }
+        .result-value { font-weight: 700; color: var(--accent-orange); }
+
+        /* Asistente IA Chat UI */
+        .chat-box {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-height: 320px;
+            min-height: 250px;
+            overflow-y: auto;
+            padding-right: 4px;
+            margin-bottom: 12px;
+        }
+
+        .chat-msg {
+            padding: 12px 16px;
+            border-radius: 14px;
+            font-size: 0.88rem;
+            line-height: 1.4;
+            max-width: 85%;
+            white-space: pre-line;
+        }
+
+        .chat-msg.bot {
+            background-color: var(--light-bg-blue);
+            color: var(--primary-blue);
+            align-self: flex-start;
+            border-bottom-left-radius: 2px;
+            border-left: 3px solid var(--accent-orange);
+        }
+
+        .chat-msg.user {
+            background-color: var(--primary-blue);
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 2px;
+        }
+
+        .chat-input-row {
+            display: flex;
+            gap: 8px;
+        }
+
+        .chat-input-row input {
+            flex: 1;
+            padding: 12px;
+            border: 1.5px solid var(--border-color);
+            border-radius: 10px;
+            outline: none;
+        }
+
+        .chat-input-row button {
+            flex: none;
+            width: 50px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .preset-pills {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+            margin-bottom: 10px;
+        }
+
+        .pill {
+            background: #f1f5f9;
+            color: var(--primary-blue);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            white-space: nowrap;
+            cursor: pointer;
+            border: 1px solid var(--border-color);
+        }
+
+        .pill:hover {
+            border-color: var(--accent-orange);
+        }
+
+        /* Historial de Hilos de IA */
+        .chat-threads-container {
+            max-height: 100px;
+            overflow-y: auto;
+            margin-bottom: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .thread-item {
+            background: #fff;
+            border: 1px solid var(--border-color);
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .thread-item.active {
+            border-color: var(--accent-orange);
+            background-color: var(--light-bg-blue);
+            font-weight: bold;
+        }
+
+        /* Barra de Navegación Inferior */
+        .bottom-nav {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 68px;
+            background: var(--card-bg);
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding-bottom: 6px;
+            z-index: 101;
+        }
+
+        .nav-tab {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            color: var(--text-muted);
+            font-size: 0.72rem;
+            font-weight: 600;
+            cursor: pointer;
+            flex: 1;
+        }
+
+        .nav-tab.active { color: var(--primary-blue); font-weight: 700; }
+        .nav-tab-ai { position: relative; top: -12px; }
+
+        .ai-btn-circle {
+            width: 46px;
+            height: 46px;
+            background: var(--accent-orange);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 10px rgba(217, 119, 36, 0.3);
+            font-size: 1.2rem;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+<div class="phone-container">
+    <header class="app-header" id="app-bar-title">IngeMath</header>
+
+    <main class="app-content">
+        
+        <!-- PANTALLA 1: MENÚ PRINCIPAL -->
+        <div id="screen-1" class="screen">
+            
+            <div class="ai-banner" onclick="openAIScreen()">
+                <div class="ai-profile">
+                    <div class="ai-avatar">👷</div>
+                    <div class="ai-text">
+                        <h3>Asistente IA Interactivo</h3>
+                        <p>Pregúntame o describe tus datos</p>
+                    </div>
+                </div>
+                <div style="font-size: 1.2rem; opacity: 0.8;">&rsaquo;</div>
+            </div>
+
+            <div class="secondary-actions">
+                <div class="btn-action" onclick="navigate('screen-converter')">🔄 Conversor de Unidades</div>
+            </div>
+
+            <!-- Grilla de Módulos Activos -->
+            <div class="modules-grid">
+                
+                <!-- Hormigón -->
+                <div class="card-module" onclick="selectMaterial('concreto')">
+                    <div class="card-image-area">
+                        <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+                    </div>
+                    <div class="card-label">Cálculo de Hormigón</div>
+                </div>
+
+                <!-- Ladrillo -->
+                <div class="card-module" onclick="selectMaterial('ladrillo')">
+                    <div class="card-image-area">
+                        <svg viewBox="0 0 24 24"><path d="M19 4H5c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm-2 5h-4V6h4v3zm-6-3v3H7V6h4z"/></svg>
+                    </div>
+                    <div class="card-label">Cálculo de Ladrillo</div>
+                </div>
+
+                <!-- Bloque -->
+                <div class="card-module" onclick="selectMaterial('bloque')">
+                    <div class="card-image-area">
+                        <svg viewBox="0 0 24 24"><path d="M4 4h16v16H4V4zm2 2v12h12V6H6z"/></svg>
+                    </div>
+                    <div class="card-label">Cálculo de Bloque</div>
+                </div>
+
+                <!-- Pintura -->
+                <div class="card-module" onclick="selectMaterial('pintura')">
+                    <div class="card-image-area">
+                        <svg viewBox="0 0 24 24"><path d="M12 3c-4.97 0-9 4.03-9 9 0 2.12.74 4.07 1.97 5.61L4.35 19.2c-.39.39-.39 1.02 0 1.41.39.39 1.02.39 1.41 0l1.9-1.9C9.17 19.43 10.53 19.5 12 19.5c4.97 0 9-4.03 9-9s-4.03-9-9-9z"/></svg>
+                    </div>
+                    <div class="card-label">Cálculo de Pintura</div>
+                </div>
+
+                <!-- Cerámica -->
+                <div class="card-module" onclick="selectMaterial('ceramica')">
+                    <div class="card-image-area">
+                        <svg viewBox="0 0 24 24"><path d="M4 4h7v7H4zm9 0h7v7h-7zm-9 9h7v7H4zm9 0h7v7h-7z"/></svg>
+                    </div>
+                    <div class="card-label">Cálculo de Cerámica</div>
+                </div>
+
+                <!-- Repello -->
+                <div class="card-module" onclick="selectMaterial('repello')">
+                    <div class="card-image-area">
+                        <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM7 7h10v2H7V7zm0 4h10v2H7v-2z"/></svg>
+                    </div>
+                    <div class="card-label">Cálculo de Repello</div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- PANTALLA 2: ENTRADA DE DATOS -->
+        <div id="screen-2" class="screen hidden">
+            <div class="form-title" id="form-module-title">Ingreso de Datos</div>
+            <form id="material-form" onsubmit="processCalculation(event)">
+                <div id="dynamic-fields"></div>
+                <div class="btn-group">
+                    <button type="button" class="btn-secondary" onclick="navigate('screen-1')">Atrás</button>
+                    <button type="submit" class="btn-primary">Calcular</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- PANTALLA 3: RESULTADOS -->
+        <div id="screen-3" class="screen hidden">
+            <div class="form-title">Resultado Obtenido</div>
+            <div class="results-card">
+                <div id="results-output"></div>
+            </div>
+            <button type="button" class="btn-primary" onclick="resetApp()" style="width: 100%;">Menú Principal</button>
+        </div>
+
+        <!-- PANTALLA IA: ASISTENTE INTERACTIVO CON HISTORIAL DE CHATS -->
+        <div id="screen-ai" class="screen hidden">
+            <div class="form-title">
+                <span>Asistente IA</span>
+                <button type="button" class="btn-primary btn-small" onclick="createNewChatSession()">+ Nueva Charla</button>
+            </div>
+            
+            <!-- Lista de Hilos de Conversación Guardados -->
+            <div id="chat-threads-list" class="chat-threads-container"></div>
+
+            <div class="preset-pills">
+                <div class="pill" onclick="sendPreset('Losa de 6x4m espesor 12cm')">Losa 6x4m (12cm)</div>
+                <div class="pill" onclick="sendPreset('¿Cuándo desencofrar una viga?')">Desencofrado de vigas</div>
+                <div class="pill" onclick="sendPreset('Muro de bloque de 10m de largo por 2.5m de alto')">Muro 10x2.5m</div>
+                <div class="pill" onclick="sendPreset('Pintar habitación de 5x4m')">Pintura 5x4m</div>
+            </div>
+
+            <div class="chat-box" id="chat-box"></div>
+
+            <div class="chat-input-row">
+                <input type="text" id="ai-user-input" placeholder="Escribe tu consulta o datos..." onkeypress="handleKeyPress(event)">
+                <button class="btn-primary" onclick="processAIQuery()">➔</button>
+            </div>
+            <button type="button" class="btn-secondary" onclick="navigate('screen-1')" style="width: 100%; margin-top: 12px;">Regresar</button>
+        </div>
+
+        <!-- PANTALLA: CONVERSOR DE UNIDADES -->
+        <div id="screen-converter" class="screen hidden">
+            <div class="form-title">Conversor de Unidades</div>
+            
+            <div class="form-group">
+                <label>Categoría:</label>
+                <select id="conv-category" onchange="updateConverterUnits()">
+                    <option value="longitud">Longitud</option>
+                    <option value="area">Área</option>
+                    <option value="volumen">Volumen</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Valor a convertir:</label>
+                <input type="number" id="conv-input" step="any" placeholder="0.00" oninput="runConversion()">
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>De:</label>
+                    <select id="conv-from" onchange="runConversion()"></select>
+                </div>
+                <div class="form-group">
+                    <label>A:</label>
+                    <select id="conv-to" onchange="runConversion()"></select>
+                </div>
+            </div>
+
+            <div class="results-card" style="margin-top: 10px;">
+                <div class="result-item">
+                    <span>Resultado:</span>
+                    <span class="result-value" id="conv-result">0.00</span>
+                </div>
+            </div>
+
+            <button type="button" class="btn-secondary" onclick="navigate('screen-1')" style="width: 100%; margin-top: 10px;">Regresar</button>
+        </div>
+
+        <!-- PANTALLA: HISTORIAL DE CÁLCULOS -->
+        <div id="screen-history" class="screen hidden">
+            <div class="form-title">Historial de Cálculos</div>
+            <div id="history-container"></div>
+            <button type="button" class="btn-secondary" onclick="navigate('screen-1')" style="width: 100%;">Regresar</button>
+        </div>
+
+    </main>
+
+    <!-- BARRA DE NAVEGACIÓN INFERIOR -->
+    <nav class="bottom-nav">
+        <div class="nav-tab active" id="tab-home" onclick="navigate('screen-1')">
+            <span>🏠</span><span>Inicio</span>
+        </div>
+        <div class="nav-tab nav-tab-ai" id="tab-ai" onclick="openAIScreen()">
+            <div class="ai-btn-circle">🤖</div>
+            <span style="margin-top: 4px;">AI</span>
+        </div>
+        <div class="nav-tab" id="tab-history" onclick="openHistory()">
+            <span>📊</span><span>Historial</span>
+        </div>
+    </nav>
+</div>
+
+<script>
+    let currentMaterial = '';
+    let calculationsHistory = [];
+
+    let chatSessions = [];
+    let currentChatId = null;
+
+    const DEFAULT_BOT_MSG = "👋 ¡Hola! Soy tu asistente de ingeniería. Puedes consultarme dudas técnicas de obra o pedirme cálculos en lenguaje natural (ej: 'Calcula el concreto para una losa de 8x5m y 15cm de grosor').";
+
+    const materialNames = {
+        concreto: 'Cálculo de Hormigón',
+        ladrillo: 'Cálculo de Ladrillo',
+        bloque: 'Cálculo de Bloque',
+        pintura: 'Cálculo de Pintura',
+        ceramica: 'Cálculo de Cerámica',
+        repello: 'Cálculo de Repello'
+    };
+
+    function initChatSystem() {
+        if (chatSessions.length === 0) {
+            createNewChatSession();
+        }
+    }
+
+    function createNewChatSession() {
+        const newId = Date.now();
+        const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        const newSession = {
+            id: newId,
+            title: `Conversación ${chatSessions.length + 1} (${timeStr})`,
+            messages: [{ sender: 'bot', text: DEFAULT_BOT_MSG }]
+        };
+        chatSessions.unshift(newSession);
+        currentChatId = newId;
+        renderChatThreads();
+        renderCurrentChat();
+    }
+
+    function switchChatSession(id) {
+        currentChatId = id;
+        renderChatThreads();
+        renderCurrentChat();
+    }
+
+    function renderChatThreads() {
+        const container = document.getElementById('chat-threads-list');
+        container.innerHTML = '';
+
+        chatSessions.forEach(session => {
+            const threadEl = document.createElement('div');
+            threadEl.className = `thread-item ${session.id === currentChatId ? 'active' : ''}`;
+            threadEl.onclick = () => switchChatSession(session.id);
+            threadEl.innerHTML = `
+                <span>💬 ${session.title}</span>
+                <span style="font-size:0.7rem; opacity:0.7;">${session.messages.length - 1} msgs</span>
+            `;
+            container.appendChild(threadEl);
+        });
+    }
+
+    function renderCurrentChat() {
+        const box = document.getElementById('chat-box');
+        box.innerHTML = '';
+        const currentSession = chatSessions.find(s => s.id === currentChatId);
+        
+        if (currentSession) {
+            currentSession.messages.forEach(msg => {
+                const msgDiv = document.createElement('div');
+                msgDiv.className = `chat-msg ${msg.sender}`;
+                msgDiv.innerText = msg.text;
+                box.appendChild(msgDiv);
+            });
+        }
+        box.scrollTop = box.scrollHeight;
+    }
+
+    function setTabActive(tabId) {
+        document.querySelectorAll('.nav-tab').forEach(tab => tab.classList.remove('active'));
+        if(document.getElementById(tabId)) {
+            document.getElementById(tabId).classList.add('active');
+        }
+    }
+
+    function navigate(screenId) {
+        document.querySelectorAll('.screen').forEach(screen => screen.classList.add('hidden'));
+        document.getElementById(screenId).classList.remove('hidden');
+        
+        const header = document.getElementById('app-bar-title');
+        if (screenId === 'screen-1') {
+            header.innerText = "IngeMath";
+            setTabActive('tab-home');
+        } else if (screenId === 'screen-ai') {
+            header.innerText = "Asistente IA";
+            setTabActive('tab-ai');
+            initChatSystem();
+        } else if (screenId === 'screen-converter') {
+            header.innerText = "Conversor";
+            updateConverterUnits();
+        } else if (screenId === 'screen-history') {
+            header.innerText = "Historial";
+            setTabActive('tab-history');
+        } else if (screenId === 'screen-2') {
+            header.innerText = "Entrada de Datos";
+        } else if (screenId === 'screen-3') {
+            header.innerText = "Resultados";
+        }
+    }
+
+    function openAIScreen() {
+        navigate('screen-ai');
+    }
+
+    function handleKeyPress(e) {
+        if (e.key === 'Enter') processAIQuery();
+    }
+
+    function sendPreset(text) {
+        document.getElementById('ai-user-input').value = text;
+        processAIQuery();
+    }
+
+    function appendMessage(sender, text) {
+        const currentSession = chatSessions.find(s => s.id === currentChatId);
+        if (currentSession) {
+            currentSession.messages.push({ sender, text });
+            
+            if (sender === 'user' && currentSession.messages.length === 2) {
+                currentSession.title = text.length > 20 ? text.substring(0, 20) + '...' : text;
+                renderChatThreads();
+            }
+        }
+        renderCurrentChat();
+    }
+
+    function processAIQuery() {
+        const input = document.getElementById('ai-user-input');
+        const query = input.value.trim();
+        if (!query) return;
+
+        appendMessage('user', query);
+        input.value = '';
+
+        setTimeout(() => {
+            const reply = getAIResponse(query);
+            appendMessage('bot', reply);
+        }, 400);
+    }
+
+    function getAIResponse(text) {
+        const lower = text.toLowerCase();
+
+        if (lower.includes('losa') || lower.includes('concreto') || lower.includes('hormigon') || lower.includes('zapata')) {
+            const numbers = lower.match(/\d+(?:\.\d+)?/g);
+            if (numbers && numbers.length >= 3) {
+                const l = parseFloat(numbers[0]);
+                const a = parseFloat(numbers[1]);
+                let e = parseFloat(numbers[2]);
+                if (e > 1) e = e / 100;
+                
+                const volNeto = l * a * e;
+                const volTotal = volNeto * 1.10;
+                const cemento = Math.ceil(volTotal * 8.4);
+                const arena = (volTotal * 0.52).toFixed(2);
+                const grava = (volTotal * 0.74).toFixed(2);
+
+                return `🧮 ¡Procesé tu solicitud de concreto!\n\n• Dimensiones: ${l}m x ${a}m x ${(e*100).toFixed(0)}cm\n• Volumen Total (+10% desp.): ${volTotal.toFixed(2)} m³\n• Cemento: ${cemento} bolsas (42.5kg)\n• Arena: ${arena} m³\n• Grava: ${grava} m³`;
+            }
+            return "💡 Para calcular el concreto de tu elemento, indícame el largo, ancho y espesor en cm (ej: 'Losa de 6x4m espesor 12cm').";
+        }
+
+        if (lower.includes('bloque') || lower.includes('muro')) {
+            const numbers = lower.match(/\d+(?:\.\d+)?/g);
+            if (numbers && numbers.length >= 2) {
+                const l = parseFloat(numbers[0]);
+                const a = parseFloat(numbers[1]);
+                const area = l * a;
+                const bloques = Math.ceil((area * 12.5) * 1.10);
+                return `🧱 ¡Cálculo de muro realizado!\n\n• Área del muro: ${area.toFixed(2)} m²\n• Bloques estimados (+10% desp.): ${bloques} unidades.`;
+            }
+        }
+
+        if (lower.includes('pintar') || lower.includes('pintura')) {
+            const numbers = lower.match(/\d+(?:\.\d+)?/g);
+            if (numbers && numbers.length >= 2) {
+                const l = parseFloat(numbers[0]);
+                const a = parseFloat(numbers[1]);
+                const area = l * a * 2;
+                const galones = ((area * 2) / 30) * 1.05;
+                return `🎨 ¡Estimación de pintura para 2 capas!\n\n• Área aproximada: ${area.toFixed(2)} m²\n• Galones necesarios (+5% desp.): ${galones.toFixed(2)} Gal. (${(galones * 3.785).toFixed(1)} Ltrs)`;
+            }
+        }
+
+        if (lower.includes('desencofrar') || lower.includes('desencofre') || lower.includes('viga')) {
+            return "⏱️ Tiempos recomendados de desencofrado:\n• Costados de vigas y muros: 24 a 48 horas.\n• Fondos de losas (conservando puntales): 7 a 10 días.\n• Fondos de vigas principales: 14 a 21 días.";
+        }
+
+        if (lower.includes('traslape') || lower.includes('varilla') || lower.includes('acero')) {
+            return "📏 En el diseño estructural estándar, la longitud de traslape para varillas de refuerzo a tracción oscila típicamente entre 40 y 50 veces el diámetro de la varilla (40db - 50db).";
+        }
+
+        if (lower.includes('diferencia') && lower.includes('concreto')) {
+            return "🧱 Un concreto f'c = 180 kg/cm² se suele utilizar en plantillas, pisos no estructurales o banquetas. El f'c = 210 kg/cm² es el estándar estructural para losas, vigas, columnas y cimentaciones de viviendas.";
+        }
+
+        return "🤖 Puedo ayudarte a responder dudas de obra o calcular volumen de concreto, muros de bloque o pintura si me indicas las dimensiones. ¡Pruébalo!";
+    }
+
+    function selectMaterial(material) {
+        currentMaterial = material;
+        document.getElementById('form-module-title').innerText = materialNames[material];
+        generateFields(material);
+        navigate('screen-2');
+    }
+
+    function resetApp() {
+        navigate('screen-1');
+    }
+
+    function generateFields(material) {
+        const container = document.getElementById('dynamic-fields');
+        container.innerHTML = '';
+        let html = '';
+
+        switch (material) {
+            case 'concreto':
+                html = `
+                    <div class="form-group">
+                        <label>Resistencia Estructural (f'c):</label>
+                        <select id="resistencia">
+                            <option value="210">f'c = 210 kg/cm²</option>
+                            <option value="180">f'c = 180 kg/cm²</option>
+                            <option value="280">f'c = 280 kg/cm²</option>
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Largo (m):</label>
+                            <input type="number" id="largo" step="0.01" min="0.01" required placeholder="0.00">
+                        </div>
+                        <div class="form-group">
+                            <label>Ancho (m):</label>
+                            <input type="number" id="ancho" step="0.01" min="0.01" required placeholder="0.00">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Espesor / Altura (cm):</label>
+                            <input type="number" id="espesor" step="0.1" min="0.1" required placeholder="0.0">
+                        </div>
+                        <div class="form-group">
+                            <label>% Desperdicio:</label>
+                            <input type="number" id="desperdicio" value="10" min="0" max="50" step="1" required>
+                        </div>
+                    </div>`;
+                break;
+
+            case 'ladrillo':
+                html = `
+                    <div class="form-group">
+                        <label>Tipo / Tamaño de Ladrillo:</label>
+                        <select id="tipo_ladrillo">
+                            <option value="estandard">Ladrillo Estándar / Fiscal (7x14x28 cm) - ~38 un/m²</option>
+                            <option value="panal">Ladrillo de Panal / Perforado (10x15x20 cm) - ~45 un/m²</option>
+                            <option value="mazizo">Ladrillo Redondo / Macizo Artesanal (5x10x20 cm) - ~60 un/m²</option>
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Largo de Pared (m):</label>
+                            <input type="number" id="largo_muro" step="0.01" min="0.01" required placeholder="0.00">
+                        </div>
+                        <div class="form-group">
+                            <label>Alto de Pared (m):</label>
+                            <input type="number" id="alto_muro" step="0.01" min="0.01" required placeholder="0.00">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>% Desperdicio:</label>
+                        <input type="number" id="desperdicio" value="10" min="0" max="50" step="1" required>
+                    </div>`;
+                break;
+
+            case 'bloque':
+                html = `
+                    <div class="form-group">
+                        <label>Tipo de Bloque:</label>
+                        <select id="tipo_bloque">
+                            <option value="10">Bloque de 10 cm (10x20x40)</option>
+                            <option value="15" selected>Bloque de 15 cm (15x20x40)</option>
+                            <option value="20">Bloque de 20 cm (20x20x40)</option>
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Largo de Pared (m):</label>
+                            <input type="number" id="largo_muro" step="0.01" min="0.01" required placeholder="0.00">
+                        </div>
+                        <div class="form-group">
+                            <label>Alto de Pared (m):</label>
+                            <input type="number" id="alto_muro" step="0.01" min="0.01" required placeholder="0.00">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>% Desperdicio:</label>
+                        <input type="number" id="desperdicio" value="10" min="0" max="50" step="1" required>
+                    </div>`;
+                break;
+                
+            case 'pintura':
+                html = `
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Largo a pintar (m):</label>
+                            <input type="number" id="largo_muro" step="0.01" min="0.01" required placeholder="0.00">
+                        </div>
+                        <div class="form-group">
+                            <label>Alto a pintar (m):</label>
+                            <input type="number" id="alto_muro" step="0.01" min="0.01" required placeholder="0.00">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Manos de pintura:</label>
+                        <select id="manos">
+                            <option value="1">1 Mano</option>
+                            <option value="2" selected>2 Manos</option>
+                            <option value="3">3 Manos</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>% Desperdicio:</label>
+                        <input type="number" id="desperdicio" value="5" min="0" max="50" step="1" required>
+                    </div>`;
+                break;
+                
+            case 'ceramica':
+            case 'repello':
+                html = `
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Largo del área (m):</label>
+                            <input type="number" id="largo_muro" step="0.01" min="0.01" required placeholder="0.00">
+                        </div>
+                        <div class="form-group">
+                            <label>Ancho/Alto del área (m):</label>
+                            <input type="number" id="alto_muro" step="0.01" min="0.01" required placeholder="0.00">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>% Desperdicio:</label>
+                        <input type="number" id="desperdicio" value="${material === 'ceramica' ? '10' : '5'}" min="0" max="50" step="1" required>
+                    </div>`;
+                break;
+        }
+        container.innerHTML = html;
+    }
+
+    function processCalculation(e) {
+        e.preventDefault();
+        let resultHTML = '';
+        let resumenTexto = '';
+        
+        const despValue = parseFloat(document.getElementById('desperdicio').value) / 100;
+        const factorDesp = 1 + despValue;
+
+        if (currentMaterial === 'concreto') {
+            const l = parseFloat(document.getElementById('largo').value);
+            const a = parseFloat(document.getElementById('ancho').value);
+            const e_cm = parseFloat(document.getElementById('espesor').value);
+            const e_m = e_cm / 100;
+            const fc = document.getElementById('resistencia').value;
+
+            const volNeto = l * a * e_m;
+            const volTotal = volNeto * factorDesp;
+
+            let cem = 8.4, are = 0.52, gra = 0.74, agu = 0.18;
+            if (fc === '180') { cem = 7.5; are = 0.55; gra = 0.76; agu = 0.18; }
+            if (fc === '280') { cem = 10.5; are = 0.48; gra = 0.72; agu = 0.19; }
+
+            const reqCem = Math.ceil(volTotal * cem);
+            const reqAre = (volTotal * are).toFixed(2);
+            const reqGra = (volTotal * gra).toFixed(2);
+            
+            resultHTML = `
+                <div class="result-item"><span>Volumen Neto:</span><span class="result-value">${volNeto.toFixed(2)} m³</span></div>
+                <div class="result-item"><span>Volumen (+${despValue*100}% desp.):</span><span class="result-value">${volTotal.toFixed(2)} m³</span></div>
+                <div class="result-item"><span>Cemento (Bolsas 42.5kg):</span><span class="result-value">${reqCem} und.</span></div>
+                <div class="result-item"><span>Arena:</span><span class="result-value">${reqAre} m³</span></div>
+                <div class="result-item"><span>Grava:</span><span class="result-value">${reqGra} m³</span></div>
+            `;
+            resumenTexto = `Hormigón f'c=${fc}: ${volTotal.toFixed(2)} m³`;
+
+        } else if (currentMaterial === 'ladrillo') {
+            const tipoLadrillo = document.getElementById('tipo_ladrillo').value;
+            const l = parseFloat(document.getElementById('largo_muro').value);
+            const a = parseFloat(document.getElementById('alto_muro').value);
+            const area = l * a;
+            
+            let rend = 38;
+            let nombreLadrilloStr = "Estándar / Fiscal";
+            if (tipoLadrillo === 'panal') {
+                rend = 45;
+                nombreLadrilloStr = "Panal / Perforado";
+            } else if (tipoLadrillo === 'mazizo') {
+                rend = 60;
+                nombreLadrilloStr = "Macizo Artesanal";
+            }
+
+            const totalUnid = Math.ceil(area * rend * factorDesp);
+
+            resultHTML = `
+                <div class="result-item"><span>Tipo de Ladrillo:</span><span class="result-value">${nombreLadrilloStr}</span></div>
+                <div class="result-item"><span>Área Total:</span><span class="result-value">${area.toFixed(2)} m²</span></div>
+                <div class="result-item"><span>Rendimiento:</span><span class="result-value">${rend} unid/m²</span></div>
+                <div class="result-item"><span>Unidades Totales (+${despValue*100}%):</span><span class="result-value">${totalUnid} unid.</span></div>
+            `;
+            resumenTexto = `Ladrillo (${nombreLadrilloStr}): ${totalUnid} unid. (${area.toFixed(2)} m²)`;
+
+        } else if (currentMaterial === 'bloque') {
+            const tipoBloque = document.getElementById('tipo_bloque').value;
+            const l = parseFloat(document.getElementById('largo_muro').value);
+            const a = parseFloat(document.getElementById('alto_muro').value);
+            const area = l * a;
+            
+            const rend = 12.5; 
+            const totalUnid = Math.ceil(area * rend * factorDesp);
+
+            resultHTML = `
+                <div class="result-item"><span>Tipo de Bloque:</span><span class="result-value">${tipoBloque} cm</span></div>
+                <div class="result-item"><span>Área Total:</span><span class="result-value">${area.toFixed(2)} m²</span></div>
+                <div class="result-item"><span>Bloques Totales (+${despValue*100}%):</span><span class="result-value">${totalUnid} unid.</span></div>
+            `;
+            resumenTexto = `Bloque ${tipoBloque}cm: ${totalUnid} unid.`;
+
+        } else if (currentMaterial === 'pintura') {
+            const l = parseFloat(document.getElementById('largo_muro').value);
+            const a = parseFloat(document.getElementById('alto_muro').value);
+            const manos = parseFloat(document.getElementById('manos').value);
+            
+            const areaUnitaria = l * a;
+            const areaTotalMano = areaUnitaria * manos;
+            
+            const rendimientoPorMano = 15;
+            const galones = (areaTotalMano / rendimientoPorMano) * factorDesp;
+
+            resultHTML = `
+                <div class="result-item"><span>Área Base:</span><span class="result-value">${areaUnitaria.toFixed(2)} m²</span></div>
+                <div class="result-item"><span>Cobertura (${manos} manos):</span><span class="result-value">${areaTotalMano.toFixed(2)} m²</span></div>
+                <div class="result-item"><span>Galones Requeridos (+${despValue*100}%):</span><span class="result-value">${galones.toFixed(2)} Gal.</span></div>
+                <div class="result-item"><span>En Litros:</span><span class="result-value">${(galones * 3.785).toFixed(2)} L.</span></div>
+            `;
+            resumenTexto = `Pintura: ${galones.toFixed(2)} Gal. (${areaUnitaria.toFixed(2)} m²)`;
+            
+        } else if (currentMaterial === 'ceramica' || currentMaterial === 'repello') {
+            const l = parseFloat(document.getElementById('largo_muro').value);
+            const a = parseFloat(document.getElementById('alto_muro').value);
+            const area = l * a;
+            const areaDesp = area * factorDesp;
+
+            resultHTML = `
+                <div class="result-item"><span>Área Neta:</span><span class="result-value">${area.toFixed(2)} m²</span></div>
+                <div class="result-item"><span>Material Requerido (+${despValue*100}%):</span><span class="result-value">${areaDesp.toFixed(2)} m²</span></div>
+            `;
+            resumenTexto = `${currentMaterial === 'ceramica' ? 'Cerámica' : 'Repello'}: ${areaDesp.toFixed(2)} m²`;
+        }
+
+        document.getElementById('results-output').innerHTML = resultHTML;
+        
+        const dateStr = new Date().toLocaleString([], { dateStyle: 'short', timeStyle: 'short' });
+        calculationsHistory.unshift({
+            tipo: materialNames[currentMaterial],
+            fecha: dateStr,
+            resumen: resumenTexto
+        });
+
+        navigate('screen-3');
+    }
+
+    const unitFactors = {
+        longitud: {
+            "Metros (m)": 1,
+            "Centímetros (cm)": 100,
+            "Pies (ft)": 3.28084,
+            "Pulgadas (in)": 39.3701,
+            "Varas": 1.196 
+        },
+        area: {
+            "Metros² (m²)": 1,
+            "Varas² (v²)": 1.431,
+            "Pies² (ft²)": 10.7639,
+            "Hectáreas": 0.0001
+        },
+        volumen: {
+            "Metros³ (m³)": 1,
+            "Litros (L)": 1000,
+            "Galones (gal)": 264.172,
+            "Pies³ (ft³)": 35.3147
+        }
+    };
+
+    function updateConverterUnits() {
+        const category = document.getElementById('conv-category').value;
+        const selectFrom = document.getElementById('conv-from');
+        const selectTo = document.getElementById('conv-to');
+        
+        selectFrom.innerHTML = '';
+        selectTo.innerHTML = '';
+        
+        const units = Object.keys(unitFactors[category]);
+        units.forEach(unit => {
+            selectFrom.add(new Option(unit, unit));
+            selectTo.add(new Option(unit, unit));
+        });
+        
+        if(units.length > 1) selectTo.selectedIndex = 1;
+        runConversion();
+    }
+
+    function runConversion() {
+        const category = document.getElementById('conv-category').value;
+        const val = parseFloat(document.getElementById('conv-input').value);
+        const unitFrom = document.getElementById('conv-from').value;
+        const unitTo = document.getElementById('conv-to').value;
+        const resultEl = document.getElementById('conv-result');
+
+        if (isNaN(val)) {
+            resultEl.innerText = "0.00";
+            return;
+        }
+
+        const factorFrom = unitFactors[category][unitFrom];
+        const factorTo = unitFactors[category][unitTo];
+        
+        const valInBase = val / factorFrom;
+        const result = valInBase * factorTo;
+
+        resultEl.innerText = result.toFixed(4);
+    }
+
+    function openHistory() {
+        const container = document.getElementById('history-container');
+        if (calculationsHistory.length === 0) {
+            container.innerHTML = '<p style="text-align: center; color: var(--text-muted); padding: 30px 10px;">No has realizado cálculos recientemente.</p>';
+        } else {
+            container.innerHTML = calculationsHistory.map(item => `
+                <div class="history-card">
+                    <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 6px;">${item.fecha}</div>
+                    <div style="font-weight: 700; color: var(--primary-blue); margin-bottom: 4px;">${item.tipo}</div>
+                    <div style="font-size: 0.9rem;">${item.resumen}</div>
+                </div>
+            `).join('');
+        }
+        navigate('screen-history');
+    }
+
+</script>
+</body>
+</html>
